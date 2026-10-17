@@ -1,0 +1,13 @@
+# Experimental replacement: one provider for UI and Agent search.
+- id: session-query-sqlite
+  disabled: true
+- id: optional-session-query-sqlite
+  disabled: true
+- id: optional-session-search
+  isolate: {}
+- insert:
+    - id: session-search-incremental
+      name: dsh-session-search-incremental
+      config:
+        path: ./session-search-incremental.sqlite
+        openAt: startup

@@ -1,0 +1,3 @@
+Independent experimental plugin, not endorsed by DeepSeek.
+Extends official DSH SQLite session search and uses DSH session-query and Cordis as pinned peers; their respective licenses remain applicable.
+No conversation logs or local recovery databases are included.

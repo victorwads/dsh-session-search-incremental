@@ -1,0 +1,93 @@
+name: Publish to npm
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: npm
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install OIDC-capable npm
+        run: npm install --global npm@11.10.1
+      - name: Install dependencies
+        run: npm ci
+      - name: Check syntax
+        run: npm run check
+      - name: Run automated tests
+        run: npm test
+      - name: Validate release metadata
+        id: release
+        env:
+          EXPECTED_PACKAGE: dsh-session-search-incremental
+        run: |
+          node --input-type=commonjs <<'NODE'
+          const fs = require('node:fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          const repository = 'git+https://github.com/' + process.env.GITHUB_REPOSITORY + '.git';
+          if (pkg.name !== process.env.EXPECTED_PACKAGE || pkg.private || pkg.repository?.url !== repository) throw new Error('Invalid publication metadata');
+          if (!/^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$/.test(pkg.version)) throw new Error('Invalid version');
+          const tag = pkg.version.includes('-') ? pkg.version.split('-')[1].split('.')[0] : 'latest';
+          if (!/^[a-z][a-z0-9._-]*$/.test(tag)) throw new Error('Invalid npm dist-tag');
+          if (pkg.publishConfig?.tag && pkg.publishConfig.tag !== tag) throw new Error('Dist-tag mismatch');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, 'name=' + pkg.name + '\nversion=' + pkg.version + '\ntag=' + tag + '\ngit_tag=v' + pkg.version + '\n');
+          NODE
+      - name: Reject published version or existing tag
+        env:
+          PACKAGE_NAME: ${{ steps.release.outputs.name }}
+          VERSION: ${{ steps.release.outputs.version }}
+          RELEASE_TAG: ${{ steps.release.outputs.git_tag }}
+        run: |
+          refs=$(git ls-remote --tags origin "refs/tags/$RELEASE_TAG" "refs/tags/$VERSION")
+          if [[ -n "$refs" ]]; then echo "Version tag already exists; bump the package version."; exit 1; fi
+          node --input-type=commonjs <<'NODE'
+          (async () => {
+            const url = 'https://registry.npmjs.org/' + encodeURIComponent(process.env.PACKAGE_NAME) + '/' + encodeURIComponent(process.env.VERSION);
+            const response = await fetch(url, {signal: AbortSignal.timeout(30000)});
+            if (response.ok) throw new Error('Version already published; bump the package version');
+            if (response.status !== 404) throw new Error('Registry check failed: ' + response.status);
+          })().catch(error => { console.error(error); process.exitCode = 1; });
+          NODE
+      - name: Validate npm package contents
+        env:
+          DIST_TAG: ${{ steps.release.outputs.tag }}
+        run: npm publish --dry-run --access public --tag "$DIST_TAG" --registry=https://registry.npmjs.org/
+      - name: Publish package using OIDC
+        env:
+          DIST_TAG: ${{ steps.release.outputs.tag }}
+        run: npm publish --provenance --access public --tag "$DIST_TAG" --registry=https://registry.npmjs.org/
+      - name: Create version tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.git_tag }}
+        run:
+          gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/tags/$RELEASE_TAG" -f
+          "sha=$GITHUB_SHA"
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.git_tag }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          flags=()
+          if [[ "$VERSION" == *-* ]]; then flags+=(--prerelease --latest=false); fi
+          gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --title "$RELEASE_TAG" --generate-notes "${flags[@]}"
