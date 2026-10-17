@@ -46,6 +46,11 @@ jobs:
           const repository = 'git+https://github.com/' + process.env.GITHUB_REPOSITORY + '.git';
           if (pkg.name !== process.env.EXPECTED_PACKAGE || pkg.private || pkg.repository?.url !== repository) throw new Error('Invalid publication metadata');
           if (!/^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$/.test(pkg.version)) throw new Error('Invalid version');
+          if (pkg.version !== pkg.engines?.dsh) throw new Error('Plugin version must exactly match engines.dsh');
+          for (const name of ['@deepseek-ai/dsh-session-query', '@deepseek-ai/dsh-session-query-sqlite']) {
+            if (pkg.peerDependencies?.[name] !== pkg.version) throw new Error('DSH peer version mismatch: ' + name);
+          }
+          if (pkg.devDependencies?.['@deepseek-ai/dsh-session'] !== pkg.version) throw new Error('DSH test dependency version mismatch');
           const tag = 'latest';
           if (!/^[a-z][a-z0-9._-]*$/.test(tag)) throw new Error('Invalid npm dist-tag');
           if (pkg.publishConfig?.tag && pkg.publishConfig.tag !== tag) throw new Error('Dist-tag mismatch');
@@ -58,12 +63,12 @@ jobs:
           RELEASE_TAG: ${{ steps.release.outputs.git_tag }}
         run: |
           refs=$(git ls-remote --tags origin "refs/tags/$RELEASE_TAG" "refs/tags/$VERSION")
-          if [[ -n "$refs" ]]; then echo "Version tag already exists; bump the package version."; exit 1; fi
+          if [[ -n "$refs" ]]; then echo "Version tag already exists; stop and ask the maintainer. Plugin version must match DSH."; exit 1; fi
           node --input-type=commonjs <<'NODE'
           (async () => {
             const url = 'https://registry.npmjs.org/' + encodeURIComponent(process.env.PACKAGE_NAME) + '/' + encodeURIComponent(process.env.VERSION);
             const response = await fetch(url, {signal: AbortSignal.timeout(30000)});
-            if (response.ok) throw new Error('Version already published; bump the package version');
+            if (response.ok) throw new Error('Version already published; stop and ask the maintainer. Plugin version must match DSH');
             if (response.status !== 404) throw new Error('Registry check failed: ' + response.status);
           })().catch(error => { console.error(error); process.exitCode = 1; });
           NODE

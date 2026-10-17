@@ -20,8 +20,12 @@ or failure in another session need not discard all progress.
 
 - Targets **DSH 0.2.1-rc.2**, Node **22.23+**, derived SQLite schema **8**. `engines.dsh` declares this exact
   host version; DSH peers are pinned to **0.2.1-rc.2** and Cordis to **4.0.5**. Other host versions, including
-  the former alpha.3 target, are not declared compatible by this manifest. The plugin version is independent
-  of the DSH host version.
+  the former alpha.3 target, are not declared compatible by this manifest.
+- **Version policy: the plugin version must exactly match the supported DSH version**, including prerelease
+  identifiers: this release is **dsh-session-search-incremental 0.2.1-rc.2 for DSH 0.2.1-rc.2**. Keep
+  `package.json.version`, `engines.dsh`, the DSH peers and lockfile aligned. Publish to **latest**, even when
+  the version includes `rc` or another prerelease suffix. Do not independently increment the plugin version.
+  If that exact version is already published, stop and ask the maintainer; never invent another version.
 - Compatibility was checked against the published RC packages using real Cordis/SQLite services and synthetic
   in-memory session data, not a full installed Web profile or sustained/restart workload.
 - Uses private engine methods: revalidate before upgrading DSH. The schema guard alone does not guarantee API

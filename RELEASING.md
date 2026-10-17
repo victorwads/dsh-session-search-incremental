@@ -39,10 +39,14 @@ See [npm trusted publishing documentation](https://docs.npmjs.com/trusted-publis
 
 ## Subsequent releases
 
-Bump the package and lockfile version, review, commit, and push main. For the next alpha, for example:
+Set the package version to the exact supported DSH version, including its prerelease suffix, and align
+`engines.dsh`, DSH peers and lockfile. Do not increment an independent plugin version. The current release is
+**0.2.1-rc.2 for DSH 0.2.1-rc.2**, on **latest**. If that version already exists on npm, stop and ask the
+maintainer rather than inventing a patch or prerelease. Review, commit, and push main:
 
 ```sh
-npm version prerelease --preid alpha --no-git-tag-version
+# Example for this DSH target (only if not already set):
+npm version 0.2.1-rc.2 --no-git-tag-version
 # Review changes, then commit and push main; wait for CI.
 gh workflow run publish.yml --repo victorwads/dsh-session-search-incremental --ref main
 ```

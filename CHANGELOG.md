@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1-rc.2
+
+- Align the plugin version exactly with supported DSH 0.2.1-rc.2. The previous alpha.4 version was published
+  with incorrect independent versioning; this release corrects that policy and supersedes it on `latest`.
+- Document version alignment in README and agent guidance, and reject mismatched plugin/DSH versions in tests
+  and publication validation.
+
 ## 0.2.1-alpha.4
 
 - Publish through the `latest` npm channel, independently of prerelease version suffixes.

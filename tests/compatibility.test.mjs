@@ -9,6 +9,11 @@ const manifest = JSON.parse(readFileSync(new URL("../package.json", import.meta.
 
 test("declared DSH rc.2 target matches the installed test dependencies", () => {
   assert.equal(manifest.engines.dsh, "0.2.1-rc.2");
+  assert.equal(manifest.version, manifest.engines.dsh, "Plugin version must exactly match DSH");
+  assert.equal(manifest.publishConfig.tag, "latest");
+  for (const name of ["@deepseek-ai/dsh-session-query", "@deepseek-ai/dsh-session-query-sqlite"]) {
+    assert.equal(manifest.peerDependencies[name], manifest.version, name);
+  }
   assert.equal(manifest.peerDependencies["@deepseek-ai/cordis"], "4.0.5");
   for (const name of [
     "@deepseek-ai/cordis",
