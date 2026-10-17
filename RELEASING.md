@@ -16,13 +16,13 @@ npm whoami --registry=https://registry.npmjs.org/
 npm ci
 npm run check
 npm test
-npm publish --dry-run --access public --tag alpha --registry=https://registry.npmjs.org/
-npm publish --access public --tag alpha --registry=https://registry.npmjs.org/
+npm publish --dry-run --access public --tag latest --registry=https://registry.npmjs.org/
+npm publish --access public --tag latest --registry=https://registry.npmjs.org/
 ```
 
-The current version is **0.2.1-alpha.3**; keep it under **alpha**, not latest. npm may ask for 2FA. The dry
-run does not publish anything. Local bootstrap does not provide GitHub Actions provenance. Publishing creates
-an immutable npm version; do not immediately dispatch CI for that same version.
+The package publishes under **latest**, including versions with a prerelease suffix. npm may ask for 2FA. The
+dry run does not publish anything. Local bootstrap does not provide GitHub Actions provenance. Publishing
+creates an immutable npm version; do not immediately dispatch CI for that same version.
 
 ## Configure OIDC once after bootstrap
 
@@ -53,6 +53,6 @@ OIDC/provenance. Only after npm publication succeeds does it create the tag and 
 blocked retry when OIDC authentication fails. If npm succeeds but GitHub tag/release creation fails, finish
 the GitHub steps manually for the published commit; do not attempt to republish or unpublish that version.
 
-Dist-tags follow the prerelease identifier (alpha → alpha, developing → developing); stable versions use
-latest. Keep publishConfig.tag aligned when changing release channels. The workflow deliberately rejects
-already-published versions, including the bootstrap version. CI must be available on main before dispatch.
+The npm dist-tag is always **latest**, independently of the version prerelease identifier. Keep
+publishConfig.tag set to latest. The workflow deliberately rejects already-published versions, including the
+bootstrap version. CI must be available on main before dispatch.

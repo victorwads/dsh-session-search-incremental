@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.2.1-alpha.4
+
+- Publish through the `latest` npm channel, independently of prerelease version suffixes.
 
 - Declare exact DSH 0.2.1-rc.2 compatibility through `engines.dsh`, pinned RC peers and Cordis 4.0.5. This
   replaces the alpha.3 host target; the plugin keeps its independent release version.

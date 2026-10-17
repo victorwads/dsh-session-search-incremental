@@ -51,10 +51,10 @@ or failure in another session need not discard all progress.
 
 ## Install from npm
 
-After publication, add the explicitly tagged prerelease to the profile serving your Web GUI:
+Install the package from the `latest` npm channel into the profile serving your Web GUI:
 
 ```sh
-dsh plugin --profile web add dsh-session-search-incremental@alpha
+dsh plugin --profile web add dsh-session-search-incremental@latest
 ```
 
 Keep this bundle **after** the official base/search bundles. Restart the existing DSH process after
@@ -70,7 +70,7 @@ the same tab, using the browser's actual origin and application path.
 After both packages are published:
 
 ```sh
-dsh plugin --profile web add dsh-deeplink dsh-session-search-incremental@alpha
+dsh plugin --profile web add dsh-deeplink dsh-session-search-incremental@latest
 ```
 
 They are **optional companions, not runtime dependencies of one another**. Deep links also work with the
@@ -146,7 +146,7 @@ and long-running/restart stability remain unverified.
 ## Publishing
 
 See the [release guide](RELEASING.md) for first-publication commands and the manual GitHub Actions/OIDC
-workflow. The current package version is `0.2.1-alpha.3` and publishes under `alpha`, not `latest`.
+workflow. The package publishes under `latest`, including versions with a prerelease suffix.
 
 ## License
 

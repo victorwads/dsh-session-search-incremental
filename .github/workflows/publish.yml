@@ -46,7 +46,7 @@ jobs:
           const repository = 'git+https://github.com/' + process.env.GITHUB_REPOSITORY + '.git';
           if (pkg.name !== process.env.EXPECTED_PACKAGE || pkg.private || pkg.repository?.url !== repository) throw new Error('Invalid publication metadata');
           if (!/^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$/.test(pkg.version)) throw new Error('Invalid version');
-          const tag = pkg.version.includes('-') ? pkg.version.split('-')[1].split('.')[0] : 'latest';
+          const tag = 'latest';
           if (!/^[a-z][a-z0-9._-]*$/.test(tag)) throw new Error('Invalid npm dist-tag');
           if (pkg.publishConfig?.tag && pkg.publishConfig.tag !== tag) throw new Error('Dist-tag mismatch');
           fs.appendFileSync(process.env.GITHUB_OUTPUT, 'name=' + pkg.name + '\nversion=' + pkg.version + '\ntag=' + tag + '\ngit_tag=v' + pkg.version + '\n');
