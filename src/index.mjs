@@ -21,7 +21,7 @@ function observation(header, inheritedEventCount, events) {
 function check(signal) {
   signal?.throwIfAborted();
 }
-// Experimental DSH 0.2.1-rc.3 adapter: preserve official query/filter/cursor semantics,
+// Experimental DSH 0.2.1-rc.4 adapter: preserve official query/filter/cursor semantics,
 // validate cold sources independently, and never make a search read the full corpus.
 export default class IncrementalQuery extends Official {
   fingerprints = new Map();

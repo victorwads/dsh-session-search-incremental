@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1-rc.4
+
+- Align the plugin release and exact DSH compatibility target to 0.2.1-rc.4.
+- Validate the RC.4 DSH peers and SQLite schema/API before release.
+
 ## 0.2.1-rc.3
 
 - Align the plugin release and exact DSH compatibility target to 0.2.1-rc.3.
