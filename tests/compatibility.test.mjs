@@ -11,8 +11,8 @@ const manifest = JSON.parse(
   readFileSync(new URL("../package.json", import.meta.url), "utf8"),
 );
 
-test("declared DSH rc.4 target matches the installed test dependencies", () => {
-  assert.equal(manifest.engines.dsh, "0.2.1-rc.4");
+test("declared DSH alpha.2 target matches the installed test dependencies", () => {
+  assert.equal(manifest.engines.dsh, "0.2.2-alpha.2");
   assert.equal(
     manifest.version,
     manifest.engines.dsh,
@@ -25,7 +25,10 @@ test("declared DSH rc.4 target matches the installed test dependencies", () => {
   ]) {
     assert.equal(manifest.peerDependencies[name], manifest.version, name);
   }
-  assert.equal(manifest.peerDependencies["@deepseek-ai/cordis"], "4.0.5");
+  assert.equal(
+    manifest.peerDependencies["@deepseek-ai/cordis"],
+    "~4.0.6-alpha.1",
+  );
   for (const name of [
     "@deepseek-ai/cordis",
     "@deepseek-ai/dsh-session-query",
@@ -33,7 +36,9 @@ test("declared DSH rc.4 target matches the installed test dependencies", () => {
   ]) {
     assert.equal(
       require(name + "/package.json").version,
-      manifest.peerDependencies[name],
+      name === "@deepseek-ai/cordis"
+        ? manifest.peerDependencies[name].replace(/^~/, "")
+        : manifest.peerDependencies[name],
       name,
     );
   }

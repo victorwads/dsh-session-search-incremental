@@ -4,9 +4,9 @@
 
 - Work only in this repository unless the user explicitly authorizes another scope.
 - The plugin version MUST exactly match the supported DSH version, including prerelease identifiers. Current
-  target: **0.2.1-rc.4** for both plugin and DSH. There is no independent plugin release sequence.
+  target: **0.2.2-alpha.2** for both plugin and DSH. There is no independent plugin release sequence.
 - Keep package.json.version, engines.dsh, DSH peer versions, test dependency versions and lockfile aligned.
-  Cordis uses its own upstream version, not the DSH version.
+  Cordis uses its own upstream version, not the DSH version. For DSH 0.2.2-alpha.2, Cordis is ~4.0.6-alpha.1.
 - Always publish to npm dist-tag **latest**, including DSH alpha/rc versions. Do not infer a dist-tag from the
   version suffix. Keep publishConfig.tag and the publication workflow set to latest.
 - If the matching version is already published, STOP and ask the maintainer. npm versions are immutable; never
