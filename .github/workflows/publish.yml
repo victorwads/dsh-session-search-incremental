@@ -92,7 +92,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ steps.release.outputs.git_tag }}
           VERSION: ${{ steps.release.outputs.version }}
-        run: |
-          flags=()
-          if [[ "$VERSION" == *-* ]]; then flags+=(--prerelease --latest=false); fi
-          gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --title "$RELEASE_TAG" --generate-notes "${flags[@]}"
+        run: gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --title "$RELEASE_TAG" --generate-notes --latest
