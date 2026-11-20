@@ -11,8 +11,8 @@ const manifest = JSON.parse(
   readFileSync(new URL("../package.json", import.meta.url), "utf8"),
 );
 
-test("declared DSH rc.4 target matches the installed test dependencies", () => {
-  assert.equal(manifest.engines.dsh, "0.2.2-rc.4");
+test("declared DSH rc.5 target matches the installed test dependencies", () => {
+  assert.equal(manifest.engines.dsh, "0.2.2-rc.5");
   assert.equal(
     manifest.version,
     manifest.engines.dsh,
