@@ -25,7 +25,10 @@ test("declared DSH target matches the installed test dependencies", () => {
   ]) {
     assert.equal(manifest.peerDependencies[name], manifest.version, name);
   }
-  assert.equal(manifest.peerDependencies["@deepseek-ai/cordis"], "~4.2.0-alpha.1");
+  assert.equal(
+    manifest.peerDependencies["@deepseek-ai/cordis"],
+    "~4.2.0-alpha.1",
+  );
   for (const name of [
     "@deepseek-ai/cordis",
     "@deepseek-ai/dsh-session-query",
