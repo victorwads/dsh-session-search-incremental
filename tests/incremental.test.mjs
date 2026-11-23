@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { Context, Service } from "@deepseek-ai/cordis";
 import Sessions from "@deepseek-ai/dsh-session";
+import Projections from "@deepseek-ai/dsh-session-projection";
 import Incremental from "../src/index.mjs";
 const message = (text, seq = 0) => ({
   seq,
@@ -17,7 +18,13 @@ async function fixture(t) {
   let opens = 0;
   const put = (id, text = "onboarding", cwd = "/test/project") =>
     records.set(id, {
-      header: { id, version: 4, createdAt: 1700000000000, cwd, isSeeded: false },
+      header: {
+        id,
+        version: 4,
+        createdAt: 1700000000000,
+        cwd,
+        isSeeded: false,
+      },
       revision: "one",
       events: [message(text)],
     });
@@ -34,7 +41,9 @@ async function fixture(t) {
     }
     async stat(id) {
       const x = records.get(id);
-      return x ? { header: x.header, revision: x.revision, formatStatus: "current" } : undefined;
+      return x
+        ? { header: x.header, revision: x.revision, formatStatus: "current" }
+        : undefined;
     }
     async open(id) {
       opens++;
@@ -60,6 +69,8 @@ async function fixture(t) {
     assert.equal(f.state, 2);
   }
   await mount(Sessions);
+  // DSH 0.2.3 requires the sessionProjections registry (static inject of the official query).
+  await mount(Projections);
   await mount(Persistence);
   await mount(Incremental, { path: ":memory:", openAt: "startup" });
   const q = ctx.sessionQuery;
@@ -72,18 +83,37 @@ async function fixture(t) {
     await q.refreshListing(undefined, true);
     await q.batch(100);
   };
-  return { ctx, q, put, records, failed, raced, sync, opens: () => opens, db: q._requireDb() };
+  return {
+    ctx,
+    q,
+    put,
+    records,
+    failed,
+    raced,
+    sync,
+    opens: () => opens,
+    db: q._requireDb(),
+  };
 }
 test("new sessions and appends replace documents without duplicates", async (t) => {
   const f = await fixture(t);
   f.put("one");
   await f.sync();
-  assert.equal((await f.q.searchSessions({ query: "onboarding" })).items.length, 1);
+  assert.equal(
+    (await f.q.searchSessions({ query: "onboarding" })).items.length,
+    1,
+  );
   f.records.get("one").events.push(message("newmarker", 1));
   f.records.get("one").revision = "two";
   await f.sync();
-  assert.equal((await f.q.searchSessions({ query: "newmarker" })).items.length, 1);
-  assert.equal(f.db.prepare("SELECT count(*) n FROM persisted_docs").get().n, 2);
+  assert.equal(
+    (await f.q.searchSessions({ query: "newmarker" })).items.length,
+    1,
+  );
+  assert.equal(
+    f.db.prepare("SELECT count(*) n FROM persisted_docs").get().n,
+    2,
+  );
   assert.equal(f.db.prepare("PRAGMA quick_check").get().quick_check, "ok");
 });
 test("device-only revision changes are read and verified", async (t) => {
@@ -94,8 +124,14 @@ test("device-only revision changes are read and verified", async (t) => {
   f.records.get("one").revision = "different-device";
   await f.sync();
   assert.equal(f.opens(), before + 1);
-  assert.equal(f.db.prepare("SELECT revision FROM persisted_sessions").get().revision, "different-device");
-  assert.equal(f.db.prepare("SELECT count(*) n FROM persisted_docs").get().n, 1);
+  assert.equal(
+    f.db.prepare("SELECT revision FROM persisted_sessions").get().revision,
+    "different-device",
+  );
+  assert.equal(
+    f.db.prepare("SELECT count(*) n FROM persisted_docs").get().n,
+    1,
+  );
 });
 test("racing and unreadable sources do not block healthy sessions", async (t) => {
   const f = await fixture(t);
@@ -117,7 +153,10 @@ test("membership deletion preserves unrelated documents", async (t) => {
   await f.sync();
   assert(!f.q.hasPersisted("removed"));
   assert(f.q.hasPersisted("kept"));
-  assert.equal(f.db.prepare("SELECT count(*) n FROM persisted_docs").get().n, 1);
+  assert.equal(
+    f.db.prepare("SELECT count(*) n FROM persisted_docs").get().n,
+    1,
+  );
 });
 test("replacement failure rolls back to last valid index", async (t) => {
   const f = await fixture(t);
@@ -131,8 +170,14 @@ test("replacement failure rolls back to last valid index", async (t) => {
     throw Error("synthetic failure");
   };
   await f.sync();
-  assert.equal((await f.q.searchSessions({ query: "onboarding" })).items.length, 1);
-  assert.equal(f.db.prepare("SELECT revision FROM persisted_sessions").get().revision, "one");
+  assert.equal(
+    (await f.q.searchSessions({ query: "onboarding" })).items.length,
+    1,
+  );
+  assert.equal(
+    f.db.prepare("SELECT revision FROM persisted_sessions").get().revision,
+    "one",
+  );
   assert.equal(f.db.prepare("PRAGMA quick_check").get().quick_check, "ok");
 });
 test("official workspace predicates and event search still apply", async (t) => {
@@ -149,7 +194,11 @@ test("official workspace predicates and event search still apply", async (t) => 
     ).items.length,
     1,
   );
-  assert.equal((await f.q.searchEvents({ sessionId: "a", query: "onboarding" })).items.length, 1);
+  assert.equal(
+    (await f.q.searchEvents({ sessionId: "a", query: "onboarding" })).items
+      .length,
+    1,
+  );
 });
 test("batch limits number of reads", async (t) => {
   const f = await fixture(t);

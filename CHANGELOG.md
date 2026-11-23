@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.3-alpha.1
+
+- Align the plugin version and DSH compatibility declaration to 0.2.3-alpha.1; update DSH peers to the official dependency set (Cordis remains ~4.1.0).
+
 ## 0.2.2-rc.5
 
 - Align the plugin version and DSH compatibility declaration to 0.2.2-rc.5; update DSH peers and Cordis to the official RC dependency set.
